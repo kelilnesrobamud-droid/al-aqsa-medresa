@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="am">
 <head>
@@ -24,8 +25,8 @@
         
         <div id="admin-login" class="bg-white p-6 rounded-[35px] shadow-lg max-w-md mx-auto mt-10 border">
             <h2 class="text-lg font-black mb-4 text-[#0d7a70] text-center italic">የአስተዳዳሪ መግቢያ</h2>
-            <input type="email" id="admin-email" placeholder="የአድሚን ኢሜል (ለምሳሌ፦ kelil@gmail.com)" class="w-full p-3 border rounded-2xl mb-3 focus:outline-none focus:ring-2 focus:ring-[#0d7a70] font-bold text-center">
-            <input type="password" id="admin-password" placeholder="ይለፍ ቃል (Password)" class="w-full p-3 border rounded-2xl mb-4 focus:outline-none focus:ring-2 focus:ring-[#0d7a70] font-bold text-center">
+            <input type="email" id="admin-email" placeholder="የአድሚን ኢሜል" class="w-full p-3 border rounded-2xl mb-3 focus:outline-none focus:ring-2 focus:ring-[#0d7a70] font-bold text-center">
+            <input type="password" id="admin-password" placeholder="ይለፍ ቃል" class="w-full p-3 border rounded-2xl mb-4 focus:outline-none focus:ring-2 focus:ring-[#0d7a70] font-bold text-center">
             <button onclick="loginAdmin()" class="w-full bg-indigo-600 text-white py-3 rounded-2xl hover:bg-indigo-700 font-black italic shadow-md">ግባ</button>
         </div>
 
@@ -36,37 +37,48 @@
                 <span class="text-xs bg-gray-200 px-3 py-1 rounded-full font-bold text-gray-600" id="today-date-display"></span>
             </div>
             
+            <p class="text-xs text-center font-bold text-gray-500 italic bg-gray-200/50 py-1 rounded-lg">💡 የተማሪዎችን ዝርዝር ለይቶ ለማየት ሳጥኖቹን (በተኖቹን) ይንኩ።</p>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-emerald-500 text-white p-6 rounded-[30px] shadow-lg flex justify-between items-center">
+                <button onclick="filterAttendance('On Time')" class="bg-emerald-500 text-white p-6 rounded-[30px] shadow-lg flex justify-between items-center text-left transition transform hover:scale-105 active:scale-95 focus:outline-none">
                     <div>
-                        <h3 class="text-sm font-bold opacity-90 uppercase">በሰዓቱ የመጡ</h3>
+                        <h3 class="text-xs font-bold opacity-90 uppercase">በሰዓቱ የመጡ (በተን)</h3>
                         <p class="text-4xl font-black mt-1" id="box-on-time">0</p>
                     </div>
                     <span class="text-3xl"><i class="fas fa-check-circle"></i></span>
-                </div>
-                <div class="bg-amber-500 text-white p-6 rounded-[30px] shadow-lg flex justify-between items-center">
+                </button>
+                <button onclick="filterAttendance('Late')" class="bg-amber-500 text-white p-6 rounded-[30px] shadow-lg flex justify-between items-center text-left transition transform hover:scale-105 active:scale-95 focus:outline-none">
                     <div>
-                        <h3 class="text-sm font-bold opacity-90 uppercase">ያረፈዱ (አርፋጅ)</h3>
+                        <h3 class="text-xs font-bold opacity-90 uppercase">ያረፈዱ / አርፋጅ (በተን)</h3>
                         <p class="text-4xl font-black mt-1" id="box-late">0</p>
                     </div>
                     <span class="text-3xl"><i class="fas fa-clock"></i></span>
-                </div>
-                <div class="bg-rose-500 text-white p-6 rounded-[30px] shadow-lg flex justify-between items-center">
+                </button>
+                <button onclick="filterAttendance('Absent')" class="bg-rose-500 text-white p-6 rounded-[30px] shadow-lg flex justify-between items-center text-left transition transform hover:scale-105 active:scale-95 focus:outline-none">
                     <div>
-                        <h3 class="text-sm font-bold opacity-90 uppercase">የቀሩ (ቀሪ)</h3>
+                        <h3 class="text-xs font-bold opacity-90 uppercase">የቀሩ / ቀሪ (በተን)</h3>
                         <p class="text-4xl font-black mt-1" id="box-absent">0</p>
                     </div>
                     <span class="text-3xl"><i class="fas fa-times-circle"></i></span>
-                </div>
+                </button>
             </div>
 
-            <div class="border-b pb-1 pt-4">
+            <div id="filter-display-section" class="bg-white p-5 rounded-[30px] shadow border-2 border-dashed border-indigo-300 hidden">
+                <div class="flex justify-between items-center border-b pb-2 mb-3">
+                    <h3 class="font-black text-gray-800 italic text-sm" id="filter-title">የተመረጡ ተማሪዎች ዝርዝር</h3>
+                    <button onclick="clearFilter()" class="text-xs bg-gray-200 text-gray-600 font-bold px-3 py-1 rounded-full hover:bg-gray-300">ሁሉንም አሳይ</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2" id="filtered-students-list">
+                    </div>
+            </div>
+
+            <div class="border-b pb-1 pt-2">
                 <h2 class="text-lg font-black text-gray-800 italic">⏱️ የክትትል ታሪክ ጊዜያት (Analytics)</h2>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-5 rounded-[30px] shadow border">
-                    <h3 class="font-black text-[#0d7a70] border-b pb-2 mb-2 italic"><i class="fas fa-calendar-day mr-1"></i> ዕለታዊ የክትትል ዝርዝር</h3>
+                    <h3 class="font-black text-[#0d7a70] border-b pb-2 mb-2 italic"><i class="fas fa-calendar-day mr-1"></i> ዕለታዊ የክትትል ዝርዝር (ጠቅላላ)</h3>
                     <div class="overflow-y-auto max-h-60 text-xs space-y-2" id="daily-list">
                         <p class="text-gray-400 text-center py-4 italic">የዛሬ መረጃ በመጫን ላይ...</p>
                     </div>
@@ -100,7 +112,6 @@
     </main>
 
     <script>
-        // ካንተ ፋይል ላይ የተወሰደው እውነተኛው እና ትክክለኛው ቁልፍህ!
         const firebaseConfig = { 
             apiKey: "AIzaSyBKw3ektgxdfvqcO-JHzJwjvfSkc-K_41A", 
             authDomain: "safe-school-b3f87.firebaseapp.com", 
@@ -114,9 +125,13 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // የዛሬውን ቀን በቁጥር ቅርጽ (YYYY-MM-DD) ማግኘት
         const todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('today-date-display').innerText = new Date().toLocaleDateString('am-ET');
+
+        // የአሁኑን የሪፖርት ዳታ ለጊዜው ሴቭ ለማድረግ
+        let currentOnTimeStudents = [];
+        let currentLateStudents = [];
+        let currentAbsentStudents = [];
 
         function loginAdmin() {
             const email = document.getElementById('admin-email').value.trim();
@@ -136,41 +151,41 @@
         }
 
         function loadLiveReports() {
-            // 1. የዕለቱ 3ቱ ሳጥኖች እና የዕለታዊ ዝርዝር መረጃዎችን በተማሪዎች ሰንጠረዥ ማንበብ
             db.collection("students").onSnapshot(snapshot => {
-                let onTimeCount = 0;
-                let lateCount = 0;
-                let absentCount = 0;
+                // ዳታውን ባዶ ማድረግ
+                currentOnTimeStudents = [];
+                currentLateStudents = [];
+                currentAbsentStudents = [];
                 
                 const dailyDiv = document.getElementById('daily-list');
                 dailyDiv.innerHTML = "";
-
                 let hasRecords = false;
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    // ተማሪው ዛሬ ከተመዘገበ ብቻ
+                    
                     if(data.attendanceDate === todayStr || data.lastAttendance) {
                         hasRecords = true;
                         let minutesBadge = "";
+                        let studentObj = { name: data.studentName, detail: "" };
                         
                         if (data.lastAttendance === "Present" || data.lastAttendance === "On Time") {
-                            onTimeCount++;
-                            minutesBadge = `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fas fa-check"></i> በሰዓቱ</span>`;
+                            studentObj.detail = "በሰዓቱ ገብቷል";
+                            currentOnTimeStudents.push(studentObj);
+                            minutesBadge = `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">በሰዓቱ</span>`;
                         } else if (data.lastAttendance === "Absent" || data.lastAttendance === "ቀሪ") {
-                            absentCount++;
-                            minutesBadge = `<span class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fas fa-user-times"></i> ቀርቷል</span>`;
-                        } else if (data.lastAttendance === "Late" || data.lastAttendance === "አርፍዷል") {
-                            lateCount++;
-                            // የመጨረሻውን የረፈደ ደቂቃ መፈለግ
+                            studentObj.detail = "ዛሬ ቀርቷል";
+                            currentAbsentStudents.push(studentObj);
+                            minutesBadge = `<span class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded-full font-bold">ቀርቷል</span>`;
+                        } else {
+                            // አርፋጅ ከሆኑ የረፈደበትን ደቂቃ ከሂስትሪ መፈለግ
                             const history = data.attendanceHistory || [];
                             const lastRecord = history[history.length - 1] || {};
                             const mins = lastRecord.minutes || "---";
-                            minutesBadge = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fas fa-running"></i> አርፍዷል (${mins}ደ)</span>`;
-                        } else {
-                            // ሌላ ማናቸውም ፅሁፍ ከመጣ በአርፋጅነት መቁጠር
-                            lateCount++;
-                            minutesBadge = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold">${data.lastAttendance}</span>`;
+                            
+                            studentObj.detail = `አርፍዷል (${mins} ደቂቃ)`;
+                            currentLateStudents.push(studentObj);
+                            minutesBadge = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold">አርፍዷል (${mins}ደ)</span>`;
                         }
 
                         dailyDiv.innerHTML += `
@@ -186,13 +201,13 @@
                     dailyDiv.innerHTML = `<p class="text-gray-400 text-center py-4 italic">ለዛሬ እስካሁን ምንም የክትትል መረጃ አልገባም</p>`;
                 }
 
-                // 3ቱን ሳጥኖች ቁጥር ማዘመን
-                document.getElementById('box-on-time').innerText = onTimeCount;
-                document.getElementById('box-late').innerText = lateCount;
-                document.getElementById('box-absent').innerText = absentCount;
+                // ቁጥሮቹን ማዘመን
+                document.getElementById('box-on-time').innerText = currentOnTimeStudents.length;
+                document.getElementById('box-late').innerText = currentLateStudents.length;
+                document.getElementById('box-absent').innerText = currentAbsentStudents.length;
             });
 
-            // 2. ወርሃዊ ጥቅል ሪፖርት ማጠቃለል (ከእያንዳንዱ ተማሪ የHistory አሬይ ላይ)
+            // 2. ወርሃዊ ጥቅል ሪፖርት ማጠቃለል
             db.collection("students").onSnapshot(snapshot => {
                 const monthlyDiv = document.getElementById('monthly-list');
                 monthlyDiv.innerHTML = "";
@@ -217,32 +232,76 @@
                 });
             });
 
-            // 3. ዓመታዊ ጥቅል ማጠቃለያ (ጠቅላላ ተማሪዎችና የክፍያ ሁነታ)
+            // 3. ዓመታዊ ጥቅል ማጠቃለያ
             db.collection("students").onSnapshot(snapshot => {
                 const yearlyDiv = document.getElementById('yearly-list');
                 yearlyDiv.innerHTML = "";
-                
                 let paidCount = 0;
                 let totalStudents = snapshot.size;
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const paidMonths = data.paidMonths || [];
-                    // ቢያንስ የአንድ ወር የከፈለ ከሆነ እንደ ምሳሌ ለመቁጠር
-                    if(paidMonths.length > 0) paidCount++;
+                    if((data.paidMonths || []).length > 0) paidCount++;
                 });
 
                 yearlyDiv.innerHTML = `
                     <div class="p-4 bg-blue-50/50 rounded-2xl border text-gray-700 space-y-2">
                         <p class="font-bold text-xs">🏢 ጠቅላላ በሲስተሙ ያሉ ተማሪዎች፦ <span class="font-black text-blue-800 text-sm">${totalStudents}</span></p>
-                        <p class="text-[11px] font-bold text-gray-500">💳 የክፍያ ማጠቃለያ ፍንጭ፦</p>
                         <div class="flex space-x-2 text-[10px]">
-                            <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-lg font-bold">የከፈሉ (ቢያንስ 1 ወር)፦ ${paidCount}</span>
+                            <span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-lg font-bold">የከፈሉ፦ ${paidCount}</span>
                             <span class="bg-rose-100 text-rose-800 px-2 py-1 rounded-lg font-bold">ያልከፈሉ፦ ${totalStudents - paidCount}</span>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        // በተኖቹ ሲነኩ የተማሪዎችን ስም ለይቶ የሚያሳይ ፈንክሽን
+        function filterAttendance(type) {
+            const section = document.getElementById('filter-display-section');
+            const title = document.getElementById('filter-title');
+            const listDiv = document.getElementById('filtered-students-list');
+            
+            section.classList.remove('hidden');
+            listDiv.innerHTML = "";
+
+            let selectedList = [];
+            let colorClass = "";
+
+            if (type === 'On Time') {
+                selectedList = currentOnTimeStudents;
+                title.innerHTML = `💚 በሰዓቱ የመጡ ተማሪዎች ዝርዝር (${selectedList.length})`;
+                colorClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
+            } else if (type === 'Late') {
+                selectedList = currentLateStudents;
+                title.innerHTML = `💛 ያረፈዱ (አርፋጅ) ተማሪዎች ዝርዝር (${selectedList.length})`;
+                colorClass = "bg-amber-50 text-amber-800 border-amber-200";
+            } else if (type === 'Absent') {
+                selectedList = currentAbsentStudents;
+                title.innerHTML = `❤️ የዛሬ የቀሩ (ቀሪ) ተማሪዎች ዝርዝር (${selectedList.length})`;
+                colorClass = "bg-rose-50 text-rose-800 border-rose-200";
+            }
+
+            if(selectedList.length === 0) {
+                listDiv.innerHTML = `<p class="text-gray-400 text-xs italic py-2">በዚህ ክፍል ስር ምንም ተማሪ የለም።</p>`;
+                return;
+            }
+
+            selectedList.forEach(stud => {
+                listDiv.innerHTML += `
+                    <div class="p-3 border rounded-2xl text-xs font-bold flex justify-between items-center ${colorClass}">
+                        <span><i class="fas fa-user shadow-sm mr-1"></i> ${stud.name}</span>
+                        <span class="text-[10px] opacity-80 bg-white/60 px-2 py-0.5 rounded-full">${stud.detail}</span>
+                    </div>
+                `;
+            });
+            
+            // በተኑ ሲነካ ገጹ ቀጥታ ወደ ስም ዝርዝሩ ዝቅ እንዲል ማድረግ
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearFilter() {
+            document.getElementById('filter-display-section').classList.add('hidden');
         }
 
         function addStudent() {
