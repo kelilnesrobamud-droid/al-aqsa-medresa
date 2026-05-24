@@ -91,12 +91,30 @@
             </div>
 
             <div class="space-y-2">
-                <button onclick="toggleSection('yearly-section')" class="w-full bg-blue-50 border border-blue-100 text-blue-700 p-4 rounded-[25px] font-black text-xs flex justify-between items-center shadow-sm">
-                    <span><i class="fas fa-university mr-1"></i> 🏢 የዓመቱ አጠቃላይ ማጠቃለያ (የተማሪዎች ብዛት)</span>
+                <button onclick="toggleSection('all-students-section')" class="w-full bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-[25px] font-black text-xs flex justify-between items-center shadow-sm">
+                    <span id="total-students-title"><i class="fas fa-users mr-1"></i> 🏢 አጠቃላይ የተማሪዎች ብዛትና ሙሉ ዝርዝር</span>
                     <i class="fas fa-chevron-down text-gray-400"></i>
                 </button>
-                <div id="yearly-section" class="hidden bg-white p-4 rounded-[25px] shadow border text-xs">
-                    <div id="yearly-list"><p class="text-gray-400 text-center italic">መረጃ በመጫን ላይ...</p></div>
+                <div id="all-students-section" class="hidden bg-white p-4 rounded-[25px] shadow border max-h-60 overflow-y-auto text-xs space-y-2">
+                    <div id="all-students-list"><p class="text-gray-400 text-center italic">በመጫን ላይ...</p></div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <button onclick="toggleSection('payment-section')" class="w-full bg-purple-50 border border-purple-200 text-purple-700 p-4 rounded-[25px] font-black text-xs flex justify-between items-center shadow-sm">
+                    <span><i class="fas fa-credit-card mr-1"></i> 💳 የክፍያ ሁኔታ (የከፈሉ እና ያልከፈሉ ዝርዝር)</span>
+                    <i class="fas fa-chevron-down text-gray-400"></i>
+                </button>
+                <div id="payment-section" class="hidden bg-white p-4 rounded-[25px] shadow border text-xs space-y-4">
+                    <div>
+                        <h4 class="font-bold text-emerald-700 mb-2">🟢 የከፈሉ ተማሪዎች (ቢያንስ የአንድ ወር የከፈሉ)</h4>
+                        <div id="paid-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                    </div>
+                    <hr>
+                    <div>
+                        <h4 class="font-bold text-rose-700 mb-2">🔴 ምንም ያልከፈሉ ተማሪዎች</h4>
+                        <div id="unpaid-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                    </div>
                 </div>
             </div>
 
@@ -131,8 +149,7 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // ዛሬን በኢትዮጵያ ቅርጽና በቁጥር መልክ (YYYY-MM-DD) ማስተካከል
-        const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD ለማምጣት
+        const todayStr = new Date().toLocaleDateString('en-CA'); 
         document.getElementById('today-date-display').innerText = new Date().toLocaleDateString('am-ET');
 
         let currentOnTimeStudents = [];
@@ -162,7 +179,7 @@
         }
 
         function loadLiveReports() {
-            // መምህሩ ከሚያስገባበት 'attendance' ሰንጠረዥ ላይ የዛሬውን መረጃ በቀጥታ ማንበብ
+            // ሀ. የዛሬ ዕለታዊ የክትትል መረጃዎች (ከattendance ሰንጠረዥ)
             db.collection("attendance").onSnapshot(snapshot => {
                 currentOnTimeStudents = [];
                 currentLateStudents = [];
@@ -180,7 +197,6 @@
                     let minutesBadge = "";
                     let studentObj = { name: data.studentName || "ያልታወቀ ተማሪ", detail: "" };
                     
-                    // ሁኔታዎችን መለየት
                     if (data.status === "Present" || data.status === "On Time" || data.status === "በሰዓቱ") {
                         studentObj.detail = "በሰዓቱ ገብቷል";
                         currentOnTimeStudents.push(studentObj);
@@ -190,7 +206,6 @@
                         currentAbsentStudents.push(studentObj);
                         minutesBadge = `<span class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded-full font-bold">ቀርቷል</span>`;
                     } else {
-                        // አርፋጅ ከሆነ (ደቂቃውን መያዝ)
                         let mins = data.minutes || "---";
                         studentObj.detail = `አርፍዷል (${mins} ደቂቃ)`;
                         currentLateStudents.push(studentObj);
@@ -201,11 +216,9 @@
                         <div class="p-2.5 border-b flex justify-between items-center bg-gray-50 rounded-xl mb-1">
                             <span class="font-bold text-gray-700">${studentObj.name}</span>
                             ${minutesBadge}
-                        </div>
-                    `;
+                        </div>`;
                 });
 
-                // ቁጥሮቹን በተኖቹ ላይ ማሳየት
                 document.getElementById('box-on-time').innerText = currentOnTimeStudents.length;
                 document.getElementById('box-late').innerText = currentLateStudents.length;
                 document.getElementById('box-absent').innerText = currentAbsentStudents.length;
@@ -213,7 +226,7 @@
                 if(activeFilterType) renderFilteredList(activeFilterType);
             });
 
-            // ወርሃዊና አጠቃላይ ታሪክ ማጠቃለያ
+            // ለ. ወርሃዊ ጥቅል ሪፖርት ታሪክ
             db.collection("attendance").onSnapshot(snapshot => {
                 const monthlyDiv = document.getElementById('monthly-list');
                 monthlyDiv.innerHTML = "";
@@ -237,13 +250,60 @@
                 }
             });
 
-            // ጠቅላላ የተማሪዎች ብዛት ማሳያ
+            // ሐ. አጠቃላይ የተማሪዎች ብዛት፣ ሙሉ ዝርዝርና የክፍያ ሁኔታ (ከstudents ሰንጠረዥ)
             db.collection("students").onSnapshot(snapshot => {
-                const yearlyDiv = document.getElementById('yearly-list');
-                yearlyDiv.innerHTML = `
-                    <div class="p-4 bg-blue-50/50 rounded-2xl border text-gray-700">
-                        <p class="font-bold text-xs">🏢 ጠቅላላ በሲስተሙ የተመዘገቡ ተማሪዎች ብዛት፦ <span class="font-black text-blue-800 text-sm">${snapshot.size}</span></p>
-                    </div>`;
+                const totalTitle = document.getElementById('total-students-title');
+                const allListDiv = document.getElementById('all-students-list');
+                const paidListDiv = document.getElementById('paid-list');
+                const unpaidListDiv = document.getElementById('unpaid-list');
+
+                // ርዕሱን በተማሪዎች ቁጥር ማዘመን
+                totalTitle.innerHTML = `<i class="fas fa-users mr-1"></i> 🏢 አጠቃላይ የተማሪዎች ብዛትና ሙሉ ዝርዝር (${snapshot.size})`;
+                
+                allListDiv.innerHTML = "";
+                paidListDiv.innerHTML = "";
+                unpaidListDiv.innerHTML = "";
+
+                if(snapshot.empty) {
+                    allListDiv.innerHTML = `<p class="text-gray-400 text-center py-2 italic">ምንም የተመዘገበ ተማሪ የለም</p>`;
+                    paidListDiv.innerHTML = `<p class="text-gray-400 text-center py-2 italic">መረጃ የለም</p>`;
+                    unpaidListDiv.innerHTML = `<p class="text-gray-400 text-center py-2 italic">መረጃ የለም</p>`;
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const name = data.studentName || "ስም የሌለው";
+                    const phone = data.parentPhone || "ስልክ የለም";
+                    const paidMonths = data.paidMonths || [];
+
+                    // 1. አጠቃላይ የተማሪዎች ዝርዝር ውስጥ መደርደር
+                    allListDiv.innerHTML += `
+                        <div class="p-2.5 border-b flex justify-between items-center bg-gray-50 rounded-xl mb-1">
+                            <div>
+                                <p class="font-bold text-gray-800">${name}</p>
+                                <p class="text-[10px] text-gray-400">ወላጅ ስልክ፦ ${phone}</p>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] px-2.5 py-1 rounded-full font-bold">ተማሪ</span>
+                        </div>`;
+
+                    // 2. በክፍያ ሁኔታ ለይቶ ማስቀመጥ
+                    if(paidMonths.length > 0) {
+                        // የከፈሉ
+                        paidListDiv.innerHTML += `
+                            <div class="p-2.5 border bg-emerald-50 text-emerald-900 rounded-xl border-emerald-200">
+                                <p class="font-bold">${name}</p>
+                                <p class="text-[9px] opacity-80">የከፈሉባቸው ወራት፦ ${paidMonths.join(', ')}</p>
+                            </div>`;
+                    } else {
+                        // ያልከፈሉ
+                        unpaidListDiv.innerHTML += `
+                            <div class="p-2.5 border bg-rose-50 text-rose-900 rounded-xl border-rose-200">
+                                <p class="font-bold">${name}</p>
+                                <p class="text-[9px] opacity-80">❌ ምንም ወር አልተከፈለም</p>
+                            </div>`;
+                    }
+                });
             });
         }
 
